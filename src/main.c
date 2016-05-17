@@ -11,7 +11,7 @@
 #include "dylib.h"              // dylib_t, initDylib, cleanupDylib
 #include "util.h"               // openStream
 
-#define VERSION         "0.1.0"
+#define VERSION         "0.2.0"
 #define BUGTRACKER_URL  "https://github.com/Siguza/tbdump/issues"
 
 static void printUsage(const char *self)
@@ -38,7 +38,7 @@ static void printUsage(const char *self)
                     "    2   Invalid argument\n"
                     "    3   Memory error\n"
                     "    4   File I/O error\n"
-                    "    5   Data fornat error\n"
+                    "    5   Data format error\n"
                     , self, self);
 }
 
@@ -137,7 +137,7 @@ int main(int argc, const char** argv)
                 case RETVAL_IO:
                     fprintf(stderr, "[!] Error reading from %s: %s\n", argv[off],
                             ferror(in) != 0 ? strerror(errno) :
-                            feof(in)   != 0 ? "Hit end of file.\n" : "Internal error.\n");
+                            feof(in)   != 0 ? "Hit end of file." : "Internal error.");
                     if(!force)
                     {
                         return 4;

@@ -40,8 +40,8 @@ Like this:
 For help, run with no arguments (*note: -r still unimplemented*):
 
     Usage:
-        ./tbdump-fat [-f] dylib
-        ./tbdump-fat -r [-f] folder
+        tbdump [-f] dylib
+        tbdump -r [-f] folder
 
     Description:
         Create text-based stub libraries (.tbd files) from dylibs or frameworks.
@@ -55,18 +55,23 @@ For help, run with no arguments (*note: -r still unimplemented*):
             Rather than writing to stdout, rebuild the source directory tree in the
             current directory, with .tbd files replacing dylibs and frameworks.
 
-Return values:
-    0   Success
-    1   Generic error
-    2   Invalid argument
-    3   Memory error
-    4   File I/O error
-    5   Data fornat error
+    Return values:
+        0   Success
+        1   Generic error
+        2   Invalid argument
+        3   Memory error
+        4   File I/O error
+        5   Data fornat error
 
 ### TODO
 
-* Support dumping fat files
 * Implement recursive mode
 * Support inlining re-exports
 * Linux support
+* Tokens:
+  * `allowed-clients`
+  * `re-exports`
+  * `thread-local-symbols`
+  * `swift-version`
+  * `objc-constraint`
 * Test the hell out of this

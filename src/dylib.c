@@ -17,6 +17,8 @@
 #include "util.h"               // printStr, startsWith
 #include "dylib.h"
 
+#define SWAP32(i) ((i >> 24) & 0xff) | ((i >> 8) & 0xff00) | ((i << 8) & 0xff0000) | ((i << 24) & 0xff000000)
+
 #define READ_OR_RETURN(ptr, ntimes, stream) \
 { \
     if(fread((ptr), 1, (ntimes), (stream)) != (ntimes)) \
@@ -77,11 +79,20 @@
 
 #define GET_SYMBOL(table, type) \
 ( \
-    type == SYMTYPE_REEXPORT    ? table->reExports      : \
-    type == SYMTYPE_NORMAL      ? table->symbols        : \
-    type == SYMTYPE_WEAK        ? table->weakDefSymbols : \
-    type == SYMTYPE_OBJC_CLASS  ? table->objcClasses    : table->objcIvars \
+    (type) == SYMTYPE_REEXPORT    ? (table)->reExports      : \
+    (type) == SYMTYPE_NORMAL      ? (table)->symbols        : \
+    (type) == SYMTYPE_WEAK        ? (table)->weakDefSymbols : \
+    (type) == SYMTYPE_OBJC_CLASS  ? (table)->objcClasses    : (table)->objcIvars \
 )
+
+#define SET_SYMBOL(table, type, sym) \
+{ \
+    if((type) == SYMTYPE_REEXPORT  ) (table)->reExports      = (sym); \
+    if((type) == SYMTYPE_NORMAL    ) (table)->symbols        = (sym); \
+    if((type) == SYMTYPE_WEAK      ) (table)->weakDefSymbols = (sym); \
+    if((type) == SYMTYPE_OBJC_CLASS) (table)->objcClasses    = (sym); \
+    if((type) == SYMTYPE_OBJC_IVAR ) (table)->objcIvars      = (sym); \
+}
 
 typedef union
 {
@@ -100,6 +111,7 @@ typedef union
 
 typedef struct nlist    sym32_t;
 typedef struct nlist_64 sym64_t;
+typedef struct fat_arch fat_arch_t;
 
 typedef struct
 {
@@ -237,6 +249,7 @@ static int addSymbol(dylib_t *dylib, arch_t arch, char *sym, int type)
                     table->next = dst;
                     break;
                 }
+                table = table->next;
             }
         }
     }
@@ -245,6 +258,11 @@ static int addSymbol(dylib_t *dylib, arch_t arch, char *sym, int type)
     {
         ALLOC_OR_RETURN(s, sizeof(symbol_t))
         s->name = sym;
+    }
+    else if(prev == NULL)
+    {
+        s = GET_SYMBOL(src, type);
+        SET_SYMBOL(src, type, s->next)
     }
     else
     {
@@ -255,11 +273,7 @@ static int addSymbol(dylib_t *dylib, arch_t arch, char *sym, int type)
     prev = GET_SYMBOL(dst, type);
     if(prev == NULL)
     {
-        if(type == SYMTYPE_REEXPORT  ) dst->reExports      = s;
-        if(type == SYMTYPE_NORMAL    ) dst->symbols        = s;
-        if(type == SYMTYPE_WEAK      ) dst->weakDefSymbols = s;
-        if(type == SYMTYPE_OBJC_CLASS) dst->objcClasses    = s;
-        if(type == SYMTYPE_OBJC_IVAR ) dst->objcIvars      = s;
+        SET_SYMBOL(dst, type, s)
     }
     else
     {
@@ -384,6 +398,7 @@ static int parseLoadCommands(FILE *in, dylib_t *dylib, uint32_t ncmds, long star
             {
                 ALLOC_ARCH_TABLE(table->next, arch)
                 table = table->next;
+                break;
             }
         }
     }
@@ -447,7 +462,46 @@ int parseDylib(FILE *in, dylib_t *dylib)
     READ_OR_RETURN(buf, magicsize, in);
     if(hdr.fat.magic == FAT_CIGAM)
     {
-        // TODO
+        READ_OR_RETURN(buf + magicsize, sizeof(hdr.fat) - magicsize, in)
+        fat_arch_t ar;
+        uint32_t *off;
+        uint32_t num = SWAP32(hdr.fat.nfat_arch);
+        ALLOC_OR_RETURN(off, num * sizeof(uint32_t))
+        for(uint32_t i = 0; i < num; ++i)
+        {
+            // Cannot use READ_OR_RETURN because free()
+            if(fread(&ar, 1, sizeof(fat_arch_t), in) != sizeof(fat_arch_t))
+            {
+                free(off);
+                return RETVAL_IO;
+            }
+            off[i] = SWAP32(ar.offset);
+        }
+        // Screw it, for everything < 10, bubble sort is good enough!
+        for(uint32_t i = num - 1; i > 0; --i)
+        {
+            for(uint32_t j = 0; j < i; ++j)
+            {
+                if(off[j + 1] < off[j])
+                {
+                    uint32_t tmp = off[j];
+                    off[j] = off[j + 1];
+                    off[j + 1] = tmp;
+                }
+            }
+        }
+        for(uint32_t i = 0; i < num; ++i)
+        {
+            SEEK_OR_RETURN(in, off[i] - (ftell(in) - start))
+            int ret = parseDylib(in, dylib);
+            if(ret != RETVAL_SUCCESS)
+            {
+                free(off); // program might continue on certain errors
+                return ret;
+            }
+        }
+        free(off);
+        return RETVAL_SUCCESS;
     }
     else if(hdr._32.magic == MH_MAGIC)
     {
