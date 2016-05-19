@@ -8,8 +8,7 @@ A developer tool to dump .tbd files off Mach-O dylibs and frameworks.
 
 ### Why would I need this?
 
-> *TL;DR*:  
-> ld64 for iOS can no longer link against dylibs, and Apple stopped shipping .tbd's for private APIs.
+> TL;DR: ld64 for iOS can no longer link against dylibs and Apple stopped shipping .tbd's for private APIs.
 
 Because starting with XCode 7, the linker for iOS on arm64 will no longer accept Mach-O shared libraries to link against, but only .tbd files.  
 Additionally, starting with XCode 7.3, PrivateFrameworks .tbd files are no longer shipped with the iOS SDK<sup>1</sup>.
@@ -65,7 +64,7 @@ For help, run with no arguments (*note: -r still unimplemented*):
         2   Invalid argument
         3   Memory error
         4   File I/O error
-        5   Data fornat error
+        5   Data format error
 
 ### TODO
 
