@@ -4,22 +4,26 @@
 
 ### What is this?
 
-An (unofficial) XCode accessory, to dump .tbd files off dylibs and frameworks.
+A developer tool to dump .tbd files off Mach-O dylibs and frameworks.
 
 ### Why would I need this?
 
-> *TL;DR*: ld64 for iOS can no longer link against dylibs, and Apple stopped shipping tbd's for private APIs.
+> *TL;DR*:  
+> ld64 for iOS can no longer link against dylibs, and Apple stopped shipping .tbd's for private APIs.
 
-Because starting with XCode 7, the linker for iOS on arm64 will no longer accept Mach-O shared libraries to link against, but only .tbd files.
+Because starting with XCode 7, the linker for iOS on arm64 will no longer accept Mach-O shared libraries to link against, but only .tbd files.  
+Additionally, starting with XCode 7.3, PrivateFrameworks .tbd files are no longer shipped with the iOS SDK<sup>1</sup>.
 
 So you will only need this if all of the following hold true:
 
 * You develop for iOS
 * You target arm64
-* You link against anything else than the iOS SDK public API
+* You link against anything other than the iOS SDK public API
 
-You won't *need* it for anything else... for now (there exists a `/usr/lib/libSystem.B_debug.tbd` in El Capitan, so things might change).  
+You won't *need* it for anything else... for now (all SDKs already ship .tbd's instead of dylibs, so this might change some time).  
 You should still be able to use it for any other platform though, and it will certainly reduce the SDK size.
+
+<sup>1</sup> They were also removed from the tvOS and watchOS SDKs, but watchOS is 32-bit-only anyway and for tvOS, ld64 seems to still be able to link against dylibs. So linking against PrivateFrameworks on those platforms is as easy as extracting the libraries form the dyld shared cache of an unzipped OTA bundle.
 
 ### How do I build it?
 
@@ -75,3 +79,4 @@ For help, run with no arguments (*note: -r still unimplemented*):
   * `swift-version`
   * `objc-constraint`
 * Test the hell out of this
+* Maybe even Windows support
