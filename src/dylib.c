@@ -596,13 +596,13 @@ void printDylib(FILE *out, const dylib_t *dylib)
     fputs("\n"
           "install-name:    ", out);
     printStr(out, dylib->installName);
-    if(dylib->currentVersion != 0x0 && dylib->currentVersion != 0x10000)
+    if(dylib->currentVersion != 0x10000)
     {
         fputs("\n"
               "current-version: ", out);
         printVersion(out, dylib->currentVersion);
     }
-    if(dylib->compatibilityVersion != 0x0 && dylib->compatibilityVersion != 0x10000)
+    if(dylib->compatibilityVersion != 0x10000)
     {
         fputs("\n"
               "compatibility-version: ", out);
