@@ -608,13 +608,18 @@ void printDylib(FILE *out, const dylib_t *dylib)
               "compatibility-version: ", out);
         printVersion(out, dylib->compatibilityVersion);
     }
-    fputs("\n"
-          "exports:         \n", out);
+    fputs("\n", out);
+    bool first = true;
     for(arch_table_t *table = dylib->table; table != NULL; table = table->next)
     {
         if(table->reExports == NULL && table->symbols == NULL && table->weakDefSymbols == NULL && table->objcClasses == NULL && table->objcIvars == NULL)
         {
             continue;
+        }
+        if(first)
+        {
+            fputs("exports:         \n", out);
+            first = false;
         }
         fputs("  - archs:           [ ", out);
         printArch(out, table->arch);
