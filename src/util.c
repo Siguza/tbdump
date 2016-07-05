@@ -33,7 +33,7 @@ int printStr(FILE *out, const char *str)
             (str[i] >= '.' && str[i] <= '9') ||
             (str[i] >= 'A' && str[i] <= 'Z') ||
             (str[i] >= 'a' && str[i] <= 'z') ||
-            (str[i] == '_')
+             str[i] == '_' || str[i] == '-'
         ))
         {
             return fprintf(out, "'%s'", str);
