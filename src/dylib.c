@@ -277,14 +277,9 @@ static int addSymbol(dylib_t *dylib, arch_t arch, char *sym, int type)
     }
     else
     {
-        for(; true; prev = prev->next)
-        {
-            if(prev->next == NULL)
-            {
-                prev->next = s;
-                break;
-            }
-        }
+        for(; prev->next != NULL && strcmp(s->name, prev->next->name) > 0; prev = prev->next) /* empty */ ;
+        s->next = prev->next;
+        prev->next = s;
     }
     return RETVAL_SUCCESS;
 }
