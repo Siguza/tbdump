@@ -583,7 +583,11 @@ static void printSymbols(FILE *out, const char *name, const symbol_t *sym)
 static void printVersion(FILE *out, uint32_t version)
 {
     version_t *v = (version_t*)&version;
-    fprintf(out, "%u.%u.%u", v->a, v->b, v->c);
+    fprintf(out, "%u.%u", v->a, v->b);
+    if(v->c != 0x0)
+    {
+        fprintf(out, ".%u", v->c);
+    }
 }
 
 void printDylib(FILE *out, const dylib_t *dylib)
