@@ -1,0 +1,12 @@
+
+target = tbdump
+
+cflags = -std=c99 -O3 -Wall -DTIMESTAMP="`date +'%d. %B %Y %H:%M:%S'`"  $$CFLAGS
+
+# Use clang because it's 2020
+rule compile
+    command = clang $cflags -o tbdump $cflags $in; strip tbdump 
+
+build $target : compile src/arch.c src/dylib.c src/main.c src/platform.c src/util.c 
+
+default $target
