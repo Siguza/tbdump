@@ -18,6 +18,8 @@ const char* strArch(arch_t arch)
         case ARCH_ARMV7S:   return "armv7s";
         case ARCH_ARMV7K:   return "armv7k";
         case ARCH_ARM64:    return "arm64";
+        case ARCH_ARM64E:   return "arm64e";
+        case ARCH_ARM64_32: return "arm64_32";
     }
     return "unknown";
 }
@@ -35,12 +37,18 @@ arch_t cpu2arch(cpu_type_t cpu, cpu_subtype_t sub)
                 case CPU_SUBTYPE_ARM_V7K: return ARCH_ARMV7K;
             }
             return ARCH_ARMV7;
-        case CPU_TYPE_ARM64:    return ARCH_ARM64;
+        case CPU_TYPE_ARM64:
+            switch(sub)
+            {
+                case CPU_SUBTYPE_ARM64E: return ARCH_ARM64E;
+            }
+            return ARCH_ARM64;
+        case CPU_TYPE_ARM64_32: return ARCH_ARM64_32;
     }
     return ARCH_UNKNOWN;
 }
 
 bool isArch64(arch_t arch)
 {
-    return ((ARCH_X86_64 | ARCH_ARM64) & arch) != 0;
+    return ((ARCH_X86_64 | ARCH_ARM64 | ARCH_ARM64E) & arch) != 0;
 }

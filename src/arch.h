@@ -19,9 +19,11 @@ typedef uint32_t arch_t;
 #define ARCH_ARMV7S     ((arch_t)0x8)
 #define ARCH_ARMV7K     ((arch_t)0x10)
 #define ARCH_ARM64      ((arch_t)0x20)
+#define ARCH_ARM64E     ((arch_t)0x40)
+#define ARCH_ARM64_32   ((arch_t)0x80)
 
 #define ARCH_MIN        ARCH_I386
-#define ARCH_MAX        ARCH_ARM64
+#define ARCH_MAX        ARCH_ARM64_32
 
 #define FOR_ARCH_IN(dst, src) for(arch_t dst = ARCH_MIN; dst <= ARCH_MAX; dst <<= 1) if((src & dst) > 0)
 
