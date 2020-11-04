@@ -66,7 +66,7 @@
 { \
     for(uint32_t i = 0; i < (nsyms); ++i) \
     { \
-        if((sym)[i].n_value != 0) \
+        if((sym)[i].n_value != 0 && ((sym)[i].n_type & N_EXT)) \
         { \
             int ret = addSymbol((dylib), (arch), &(strtab)[(sym)[i].n_un.n_strx], ((sym)[i].n_desc & N_WEAK_DEF) > 0 ? SYMTYPE_WEAK : SYMTYPE_UNKNOWN); \
             if(ret != RETVAL_SUCCESS) \
